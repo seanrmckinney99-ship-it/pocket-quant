@@ -138,7 +138,7 @@
   const el = id => document.getElementById(id);
   // EDIT THIS after deploying worker.js — paste your Worker's URL here. No keys go in this file at all;
   // the Worker holds the Finnhub secret and proxies Stooq for history. See worker.js for deploy steps.
-  const WORKER_BASE = "https://REPLACE-ME.workers.dev";
+  const WORKER_BASE = "https://ticker-proxy.seanrmckinney99.workers.dev";
   const workerConfigured = () => WORKER_BASE && !WORKER_BASE.includes("REPLACE-ME");
   const num = v => { const n=parseFloat(v); return isNaN(n)?null:n; };
   const esc = s => String(s).replace(/[<>&]/g,m=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[m]));
@@ -405,6 +405,7 @@
   function drawQuantChart(canvas, q){
     const wrapEl=canvas.parentElement, w=wrapEl.clientWidth||600, h=270;
     canvas.width=w; canvas.height=h;
+    canvas.style.width=w+"px"; canvas.style.height=h+"px"; // force exact 1:1 display size — the stylesheet's width:100% rule with no explicit height left the browser to auto-scale height to preserve aspect ratio, which could very slightly compress/misplace the bottom-margin date labels depending on the parent's padding math. Inline style wins specificity and removes the ambiguity entirely.
     const ctx=canvas.getContext("2d");
     ctx.clearRect(0,0,w,h);
     const ML=8,MR=8,MT=10,MB=28, pw=w-ML-MR, ph=h-MT-MB; // MB widened to fit date labels
