@@ -138,7 +138,7 @@
   const el = id => document.getElementById(id);
   // EDIT THIS after deploying worker.js — paste your Worker's URL here. No keys go in this file at all;
   // the Worker holds the Finnhub secret and proxies Stooq for history. See worker.js for deploy steps.
-  const WORKER_BASE = "https://REPLACE-ME.workers.dev";
+  const WORKER_BASE = "https://ticker-proxy.seanrmckinney99.workers.dev";
   const workerConfigured = () => WORKER_BASE && !WORKER_BASE.includes("REPLACE-ME");
   const num = v => { const n=parseFloat(v); return isNaN(n)?null:n; };
   const esc = s => String(s).replace(/[<>&]/g,m=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[m]));
