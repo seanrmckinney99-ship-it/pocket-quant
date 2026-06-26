@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Pocket Quant</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pocket Quant">
+<meta name="theme-color" content="#0a0a0a">
+<style>
+  :root{
+    --bg:#0a0a0a; --card:#141414; --card2:#1c1c1c; --line:#2a2a2a;
+    --txt:#f2f2f2; --muted:#8a9099;
+    --green:#4ade80; --yellow:#fbbf24; --red:#ef4444; --accent:#3b82f6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--txt);font-size:14px}
+  .wrap{max-width:980px;margin:auto;padding:16px;padding-top:max(16px, env(safe-area-inset-top) + 12px);padding-bottom:max(16px, env(safe-area-inset-bottom))}
+  h1{font-size:20px;margin:0}
+  h2{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:0}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+  input{width:100%;padding:12px;background:#202020;color:#fff;border:1px solid #2c2c2c;border-radius:8px;font-size:15px}
+  input:focus{outline:none;border-color:var(--accent)}
+  button{background:var(--accent);border:none;color:#fff;padding:8px 13px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:600}
+  button.ghost{background:#242424;border:1px solid var(--line);color:var(--txt);font-weight:500}
+  button.sm{padding:4px 9px;font-size:12px}
+  button:hover{filter:brightness(1.1)}
+  .muted{color:var(--muted)}
+  .hidden{display:none}
+  .lookup-results{border:1px solid var(--line);border-radius:8px;margin-top:8px;overflow:hidden;display:none}
+  .lookup-results.show{display:block}
+  .lookup-item{padding:10px 12px;cursor:pointer;display:flex;justify-content:space-between;gap:10px}
+  .lookup-item+.lookup-item{border-top:1px solid var(--line)}
+  .lookup-item:hover{background:var(--card2)}
+  .lookup-item .sym{font-weight:700}
+  .lookup-item .nm{color:var(--muted);font-size:12px;text-align:right}
+  .head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+  .price-big{font-size:30px;font-weight:800;line-height:1}
+  .sub{font-size:13px;margin-top:4px}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid var(--line)}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .g{background:var(--green)} .y{background:var(--yellow)} .r{background:var(--red)}
+  .txt-g{color:var(--green)} .txt-y{color:var(--yellow)} .txt-r{color:var(--red)} .txt-a{color:var(--accent)}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:10px;margin-top:14px}
+  .metric{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:10px}
+  .metric .l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .metric .v{font-size:16px;font-weight:700;margin-top:3px}
+  .band{margin-top:16px}
+  .band-track{position:relative;height:10px;background:linear-gradient(90deg,#3a1f1f,#3a361f,#1f3a26);border-radius:6px;margin-top:8px}
+  .band-mark{position:absolute;top:-4px;width:3px;height:18px;background:#fff;border-radius:2px;transform:translateX(-50%)}
+  .band-lab{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .chip{padding:5px 10px;border-radius:7px;font-size:12px;border:1px solid var(--line);background:#1a1a1a}
+  .chip.gc{border-color:var(--green);color:var(--green)}
+  .chip.yc{border-color:var(--yellow);color:var(--yellow)}
+  .chip.rc{border-color:var(--red);color:var(--red)}
+  .verdict{font-size:16px;font-weight:700;margin-top:14px;padding:12px;border-radius:8px;background:var(--card2);border:1px solid var(--line)}
+  .badge{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);margin-left:6px;cursor:pointer}
+  .wl-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;background:var(--card2);cursor:pointer}
+  .wl-row:hover{border-color:var(--accent)}
+  .wl-left{display:flex;align-items:center;gap:10px}
+  .wl-sym{font-weight:700;min-width:64px}
+  .empty{color:var(--muted);font-style:italic}
+  footer{font-size:11px;color:var(--muted);text-align:center;margin:18px 0}
+  .qhead{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  .qcanvas-wrap{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 8px 4px}
+  .qcanvas-wrap canvas{width:100%;display:block}
+  .qlegend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:8px}
+  .qlegend span{display:flex;align-items:center;gap:5px}
+  .qsw{width:14px;height:3px;border-radius:2px;display:inline-block}
+  .qrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  @media(max-width:600px){.qrow{grid-template-columns:1fr}}
+  .qbox{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:10px}
+  .qbox .t{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px}
+  .qbox .d{font-size:13px;line-height:1.5}
+  .qnote{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <h1>Pocket Quant</h1>
+    <div class="topbar" style="margin:0;gap:8px">
+      <span id="regimeChip" class="pill muted">Regime —</span>
+      <button id="connBtn" class="ghost sm">Check Connection</button>
+    </div>
+  </div>
+
+  <div id="setupNotice" class="card hidden">
+    <b class="txt-y">One-time setup needed — no keys go in this page anymore</b>
+    <div class="muted" style="margin-top:6px;font-size:13px">This page calls a Cloudflare Worker that holds your Finnhub key server-side and fetches historical data, so nothing is ever typed into the browser. Deploy <code>worker.js</code> (Cloudflare dashboard → Workers & Pages → Create → paste the file → Deploy → Settings → Secrets → add <code>FINNHUB_KEY</code>), then edit the <code>WORKER_BASE</code> constant near the top of this file's script to your Worker's URL and re-push.</div>
+  </div>
+
+  <div class="card">
+    <input id="lookup" placeholder="Search" autocomplete="off">
+    <div class="lookup-results" id="lookupResults"></div>
+  </div>
+
+  <div id="analysis"></div>
+
+  <div class="card">
+    <div class="topbar" style="margin-bottom:10px">
+      <h2>Watchlist — Auto-Screened</h2>
+      <span class="muted" style="font-size:11px">Add any name with ★ · Click a row to analyze</span>
+    </div>
+    <div id="watchlist"></div>
+  </div>
+
+  <footer>Quantitative screen, not advice. All data fetched live; watchlist stored locally in this browser only.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- local directory (offline name resolution + fallback fuzzy) ----------
+  const TICKER_DB = {
+    MU:"Micron Technology", MRVL:"Marvell Technology", NVDA:"NVIDIA", AMD:"Advanced Micro Devices",
+    CRDO:"Credo Technology", LITE:"Lumentum Holdings", ALAB:"Astera Labs", DELL:"Dell Technologies",
+    VRT:"Vertiv Holdings", CEG:"Constellation Energy", ORCL:"Oracle", AVGO:"Broadcom",
+    TSM:"Taiwan Semiconductor", SMCI:"Super Micro Computer", ANET:"Arista Networks",
+    FRMI:"Firmus (FRMI)", KEEL:"Keel (fmr Bitfarms)",
+    VOO:"Vanguard S&P 500 ETF", VTI:"Vanguard Total Market ETF", VBR:"Vanguard Small-Cap Value ETF",
+    SPY:"SPDR S&P 500 ETF", QQQ:"Invesco QQQ", AAPL:"Apple", MSFT:"Microsoft",
+    GOOGL:"Alphabet", AMZN:"Amazon", META:"Meta Platforms", TSLA:"Tesla"
+  };
+
+  // ---------- state ----------
+  const LS_WL = "analyzer.watchlist.v1";
+  let watchlist = loadWL();
+  function loadWL(){ try{ const a=JSON.parse(localStorage.getItem(LS_WL)); if(Array.isArray(a)) return a; }catch(e){}
+    return ["CRDO","LITE","ALAB","MU","MRVL","DELL","VRT","CEG","NVDA","ORCL","AVGO"]; }
+  function saveWL(){ localStorage.setItem(LS_WL, JSON.stringify(watchlist)); }
+
+  const metricCache = {};            // sym -> {t, m}  (metrics change slowly; cache 10 min)
+  const METRIC_TTL = 600000;
+
+  // ---------- helpers ----------
+  const el = id => document.getElementById(id);
+  // EDIT THIS after deploying worker.js — paste your Worker's URL here. No keys go in this file at all;
+  // the Worker holds the Finnhub secret and proxies Stooq for history. See worker.js for deploy steps.
+  const WORKER_BASE = "https://ticker-proxy.seanrmckinney99.workers.dev";
+  const workerConfigured = () => WORKER_BASE && !WORKER_BASE.includes("REPLACE-ME");
+  const num = v => { const n=parseFloat(v); return isNaN(n)?null:n; };
+  const esc = s => String(s).replace(/[<>&]/g,m=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[m]));
+  const fmt$ = v => (v==null||isNaN(v))?"—":"$"+Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtPct = v => (v==null||isNaN(v))?"—":(v>=0?"+":"")+Number(v).toFixed(1)+"%";
+  function fmtCap(m){ if(!m) return "—"; if(m>=1e6) return "$"+(m/1e6).toFixed(2)+"T"; if(m>=1e3) return "$"+(m/1e3).toFixed(1)+"B"; return "$"+m.toFixed(0)+"M"; }
+  function fj(path){ if(!workerConfigured()) return Promise.resolve(null);
+    return fetch(`${WORKER_BASE}/fh?path=${encodeURIComponent(path)}`).then(r=>r.ok?r.json():null).catch(()=>null); }
+  function getExt(sym){ if(!workerConfigured()) return Promise.resolve(null);
+    return fetch(`${WORKER_BASE}/ext?symbol=${encodeURIComponent(sym)}`).then(r=>r.ok?r.json():null).catch(()=>null); }
+
+  async function getMetric(sym){
+    const hit=metricCache[sym]; if(hit && Date.now()-hit.t<METRIC_TTL) return hit.m;
+    const d=await fj(`stock/metric?symbol=${sym}&metric=all`);
+    const m=(d&&d.metric)||null; if(m) metricCache[sym]={t:Date.now(),m};
+    return m;
+  }
+
+  // ---------- market volatility context (auto, self-relative — no fixed VIX bands) ----------
+  // Isolated cache for VIX's own full history — deliberately separate from the per-ticker
+  // candleCache/lastCandleDiag, since this and the ticker-analysis path fire concurrently on the
+  // same 60s tick and sharing that state would let a failure message from one bleed into the other.
+  let vixHist=null, vixHistTime=0; const VIX_HIST_TTL=900000;
+  async function getVixHistory(){
+    if(vixHist && Date.now()-vixHistTime<VIX_HIST_TTL) return vixHist;
+    if(!workerConfigured()) return null;
+    try{
+      const r=await fetch(`${WORKER_BASE}/history?symbol=${encodeURIComponent("^VIX")}`);
+      const d=await r.json();
+      if(d && d.s==="ok" && d.c && d.c.length){ vixHist=d.c; vixHistTime=Date.now(); return vixHist; }
+    }catch(e){}
+    return null;
+  }
+  function lerpColor(a,b,t){ return `rgb(${Math.round(a[0]+(b[0]-a[0])*t)},${Math.round(a[1]+(b[1]-a[1])*t)},${Math.round(a[2]+(b[2]-a[2])*t)})`; }
+  function pctColorNeutral(p){ // magnitude-only gradient (muted -> accent blue), deliberately no red/green.
+    // Used for EVERY self-relative percentile/condition metric: VIX, discount, momentum. None of these
+    // are realized outcomes — they're states whose "good or bad" implication is strategy-dependent
+    // (a contrarian wants high VIX, a value investor wants high discount, a momentum trader wants high
+    // momentum). Color-coding any of them as good/bad would assert a judgment call this app deliberately
+    // doesn't make. Green/red is reserved exclusively for realized, signed returns (see fmtPct usages) —
+    // things that already happened, not conditions whose meaning depends on what you do next.
+    if(p==null) return "#8a9099";
+    return lerpColor([138,144,153],[59,130,246], p/100);
+  }
+  let vixState=null; // {vix, percentile} — currently only drives the top regime chip (kept around in case future features want it)
+  async function loadRegime(){
+    const chip=el("regimeChip");
+    if(!workerConfigured()){ chip.textContent="Market Vol — (No Data)"; chip.style.color=""; chip.className="pill muted"; vixState=null; return; }
+    const hist=await getVixHistory();
+    if(!hist || hist.length<30){ chip.textContent="Market Vol — (No VIX History)"; chip.style.color=""; chip.className="pill muted"; vixState=null; return; }
+    const vix=hist[hist.length-1];
+    const lookback=hist.slice(0,-1).slice(-252); // trailing ~1yr, excluding today itself
+    const pct = pctRankLess(lookback, vix); // % of own trailing year LOWER than today -> today's percentile
+    vixState={vix, percentile:pct};
+    chip.className="pill";
+    chip.style.color=pctColorNeutral(pct);
+    chip.textContent = pct!=null
+      ? `VIX ${vix.toFixed(1)} · ${pct.toFixed(0)}%ile (1yr)`
+      : `VIX ${vix.toFixed(1)}`;
+  }
+
+  // ---------- search ----------
+  let timer=null, lastResults=[];
+  function localSearch(q){
+    q=q.trim().toLowerCase(); if(!q) return [];
+    const out=[];
+    for(const s in TICKER_DB){ const sl=s.toLowerCase(), n=TICKER_DB[s].toLowerCase();
+      if(sl===q||sl.startsWith(q)||(q.length>=3&&n.includes(q))) out.push({symbol:s,description:TICKER_DB[s]}); }
+    return out.slice(0,8);
+  }
+  async function remoteSearch(q){
+    if(!workerConfigured()) return null;
+    const d=await fj(`search?q=${encodeURIComponent(q)}`);
+    if(!d||!d.result) return null;
+    return d.result.filter(x=>x.symbol&&!x.symbol.includes(".")).slice(0,8).map(x=>({symbol:x.symbol,description:x.description||""}));
+  }
+  function onInput(){
+    const q=el("lookup").value;
+    clearTimeout(timer);
+    if(!q.trim()){ el("lookupResults").className="lookup-results"; lastResults=[]; return; }
+    timer=setTimeout(async ()=>{
+      let res=await remoteSearch(q); if(res==null) res=localSearch(q);
+      lastResults=res||[]; renderResults(lastResults);
+    },250);
+  }
+  function renderResults(res){
+    const box=el("lookupResults");
+    if(!res.length){ box.className="lookup-results"; box.innerHTML=""; return; }
+    box.innerHTML=res.map(r=>`<div class="lookup-item" data-sym="${r.symbol}"><span class="sym">${r.symbol}</span><span class="nm">${esc(r.description||"")}</span></div>`).join("");
+    box.className="lookup-results show";
+    box.querySelectorAll(".lookup-item").forEach(it=>it.addEventListener("click",()=>select(it.dataset.sym)));
+  }
+  function select(sym){ sym=(sym||"").toUpperCase().trim(); if(!sym) return;
+    el("lookup").value=sym; el("lookupResults").className="lookup-results"; analyze(sym); }
+
+  // ---------- self-relative percentiles + historical analog scan (replaces fixed-threshold verdict) ----------
+  // Every constant here is a knob (horizon, K, minSep), not a discovered truth — documented as such.
+  // What it deliberately does NOT have: fixed absolute thresholds applied identically to every ticker.
+  // Discount/momentum are measured against the stock's OWN trailing history, so a low-vol utility and
+  // a high-beta momentum name get genuinely different bars instead of the same -15%/+15% cutoffs.
+  function rollingHigh(closes, window){
+    const out=new Array(closes.length);
+    for(let i=0;i<closes.length;i++){
+      const start=Math.max(0,i-window+1); let m=-Infinity;
+      for(let j=start;j<=i;j++) if(closes[j]>m) m=closes[j];
+      out[i]=m;
+    }
+    return out;
+  }
+  function buildSelfRelSeries(closes, highWindow=252, momWindow=126){
+    const n=closes.length, highs=rollingHigh(closes,highWindow);
+    const discount=new Array(n).fill(null), momentum=new Array(n).fill(null);
+    for(let i=0;i<n;i++){ if(highs[i]>0) discount[i]=(closes[i]/highs[i]-1)*100; }
+    for(let i=momWindow;i<n;i++){ if(closes[i-momWindow]>0) momentum[i]=(closes[i]/closes[i-momWindow]-1)*100; }
+    return {discount, momentum};
+  }
+  function pctRankGreater(arr,value){ const v=arr.filter(x=>x!=null); if(!v.length) return null; let c=0; for(const a of v) if(a>value) c++; return c/v.length*100; }
+  function pctRankLess(arr,value){ const v=arr.filter(x=>x!=null); if(!v.length) return null; let c=0; for(const a of v) if(a<value) c++; return c/v.length*100; }
+  function stdev(arr){ const v=arr.filter(x=>x!=null); if(v.length<2) return 0; const m=v.reduce((a,b)=>a+b,0)/v.length; return Math.sqrt(v.reduce((a,b)=>a+(b-m)*(b-m),0)/v.length); }
+
+  function analogScan(closes, discount, momentum, opts){
+    opts=opts||{};
+    const horizon=opts.horizon||20, K=opts.K||30, minSep=opts.minSep||20, momWindow=opts.momWindow||126;
+    const n=closes.length, todayIdx=n-1;
+    const todayDisc=discount[todayIdx], todayMom=momentum[todayIdx];
+    if(todayDisc==null||todayMom==null) return {available:false, reason:"insufficient history for today's own discount/momentum"};
+    const poolIdx=[];
+    for(let i=momWindow;i<=todayIdx-horizon;i++){ if(discount[i]!=null && momentum[i]!=null) poolIdx.push(i); }
+    if(poolIdx.length<5) return {available:false, reason:`only ${poolIdx.length} historical candidates available — too little history`};
+    const discStd=stdev(poolIdx.map(i=>discount[i]))||1, momStd=stdev(poolIdx.map(i=>momentum[i]))||1;
+    const dists=poolIdx.map(i=>{
+      const dz=(discount[i]-todayDisc)/discStd, mz=(momentum[i]-todayMom)/momStd;
+      return {i, dist:Math.sqrt(dz*dz+mz*mz)};
+    });
+    dists.sort((a,b)=>a.dist-b.dist);
+    const selected=[];
+    for(const d of dists){ if(selected.length>=K) break; if(selected.every(s=>Math.abs(s.i-d.i)>=minSep)) selected.push(d); }
+    if(selected.length<3) return {available:false, reason:`only ${selected.length} non-overlapping historical matches found`};
+    const forwards=selected.map(s=>({i:s.i, ret:(closes[s.i+horizon]/closes[s.i]-1)*100}));
+    forwards.sort((a,b)=>a.ret-b.ret);
+    const n_matches=forwards.length;
+    const median = n_matches%2 ? forwards[(n_matches-1)/2].ret : (forwards[n_matches/2-1].ret+forwards[n_matches/2].ret)/2;
+    const pctPositive = forwards.filter(f=>f.ret>0).length/n_matches*100;
+    return {
+      available:true, horizon, n_matches, median, pctPositive,
+      minForward:forwards[0].ret, maxForward:forwards[n_matches-1].ret,
+      discountPercentile: pctRankGreater(discount.slice(0,todayIdx), todayDisc),
+      momentumPercentile: pctRankLess(momentum.slice(0,todayIdx), todayMom)
+    };
+  }
+
+  const MIN_SAMPLE = 8; // below this, the directive visibly flags itself as low-confidence rather than hiding the caveat
+  function buildDirective(sym, candles){
+    const closes=candles && candles.c;
+    if(!closes || closes.length<160) return {html:`<div class="muted" style="font-size:13px">Not enough price history for ${sym} to build a self-relative read (need ~160+ sessions).</div>`, available:false};
+    const {discount,momentum}=buildSelfRelSeries(closes);
+    const res=analogScan(closes,discount,momentum);
+    const lookbackYears=(closes.length/252).toFixed(1);
+    if(!res.available){
+      return {html:`<div class="muted" style="font-size:13px">Not enough qualifying historical analogs for ${sym} yet (${res.reason}). Discount/momentum percentiles below are still self-relative and valid on their own.</div>`, available:false,
+        discountPercentile: pctRankGreater(discount.slice(0,-1), discount[discount.length-1]),
+        momentumPercentile: pctRankLess(momentum.slice(0,-1), momentum[momentum.length-1])};
+    }
+    const small = res.n_matches < MIN_SAMPLE;
+    const sign=v=>(v>=0?"+":"")+v.toFixed(1)+"%";
+    const html = `
+      <div style="font-size:14px;line-height:1.6">
+        Currently more discounted than <b>${res.discountPercentile?.toFixed(0)}%</b> of its own trailing ${lookbackYears}-year range, with stronger momentum than <b>${res.momentumPercentile?.toFixed(0)}%</b> of that same history.
+        In <b>${res.n_matches}</b> prior instances with a similar discount/momentum profile, this stock was higher ${res.horizon} sessions later <b>${res.pctPositive.toFixed(0)}%</b> of the time
+        (median ${sign(res.median)}, range ${sign(res.minForward)} to ${sign(res.maxForward)}).
+      </div>
+      ${small?`<div class="flag txt-y" style="margin-top:8px">⚠ Small sample (n=${res.n_matches}) — treat as a low-confidence read, not a forecast.</div>`:""}
+    `;
+    return {html, available:true, ...res};
+  }
+
+  // ---------- quant: historical candles (cached) ----------
+  const candleCache={}; const CANDLE_TTL=900000; // 15 min — history doesn't need 60s refresh
+  let lastCandleDiag=""; // human-readable reason the last fetch failed, for the UI
+  async function getCandles(sym){
+    const hit=candleCache[sym]; if(hit && Date.now()-hit.t<CANDLE_TTL) return hit.d;
+    if(!workerConfigured()){
+      lastCandleDiag="Worker not configured — set WORKER_BASE in the script (see worker.js).";
+      candleCache[sym]={t:Date.now(),d:null}; return null;
+    }
+    let d=null;
+    try{
+      const r=await fetch(`${WORKER_BASE}/history?symbol=${encodeURIComponent(sym)}`);
+      d=await r.json();
+      if(!d || d.s!=="ok" || !d.c || d.c.length<60){
+        if(d&&d.error) lastCandleDiag=`Worker error: ${d.error}`;
+        else if(d&&d.s==="no_data"&&d.diag){
+          const parts=[];
+          if(d.diag.stooq) parts.push(`Stooq — ${d.diag.stooq}`);
+          if(d.diag.yahoo) parts.push(`Yahoo — ${d.diag.yahoo}`);
+          lastCandleDiag=`No historical data for ${sym}. ${parts.join(" | ")}`;
+        }
+        else lastCandleDiag="Worker returned an unexpected response.";
+        d=null;
+      } else lastCandleDiag="";
+    }catch(e){
+      lastCandleDiag=`Could not reach the Worker (${e.message}). Check WORKER_BASE is correct and the Worker is deployed.`;
+      console.error("Worker /history fetch threw:", e);
+    }
+    candleCache[sym]={t:Date.now(),d};
+    return d;
+  }
+
+  // ---------- small linear algebra ----------
+  function mat2mul(A,B){ return [[A[0][0]*B[0][0]+A[0][1]*B[1][0], A[0][0]*B[0][1]+A[0][1]*B[1][1]],
+                                  [A[1][0]*B[0][0]+A[1][1]*B[1][0], A[1][0]*B[0][1]+A[1][1]*B[1][1]]]; }
+  function mat2T(A){ return [[A[0][0],A[1][0]],[A[0][1],A[1][1]]]; }
+  function mat2add(A,B){ return [[A[0][0]+B[0][0],A[0][1]+B[0][1]],[A[1][0]+B[1][0],A[1][1]+B[1][1]]]; }
+  function solveLinear(A,b){ // Gaussian elimination w/ partial pivoting, n x n
+    const n=b.length; const M=A.map((row,i)=>row.concat([b[i]]));
+    for(let col=0;col<n;col++){
+      let piv=col; for(let r=col+1;r<n;r++) if(Math.abs(M[r][col])>Math.abs(M[piv][col])) piv=r;
+      if(Math.abs(M[piv][col])<1e-12) return null;
+      const tmp=M[col]; M[col]=M[piv]; M[piv]=tmp;
+      const pv=M[col][col]; for(let c=col;c<=n;c++) M[col][c]/=pv;
+      for(let r=0;r<n;r++){ if(r===col) continue; const f=M[r][col]; if(f===0) continue;
+        for(let c=col;c<=n;c++) M[r][c]-=f*M[col][c]; }
+    }
+    return M.map(row=>row[n]);
+  }
+  function nelderMead(f,x0,opts){ // generic n-dim simplex minimizer
+    opts=opts||{}; const maxIter=opts.maxIter||500, tol=opts.tol||1e-9, n=x0.length;
+    let simplex=[x0.slice()];
+    for(let i=0;i<n;i++){ const p=x0.slice(); p[i]+=(p[i]!==0?Math.abs(p[i])*0.1:0.1); simplex.push(p); }
+    let fvals=simplex.map(f);
+    for(let iter=0;iter<maxIter;iter++){
+      const idx=fvals.map((v,i)=>i).sort((a,b)=>fvals[a]-fvals[b]);
+      simplex=idx.map(i=>simplex[i]); fvals=idx.map(i=>fvals[i]);
+      if(Math.abs(fvals[n]-fvals[0])<tol) break;
+      const cen=new Array(n).fill(0);
+      for(let i=0;i<n;i++) for(let j=0;j<n;j++) cen[j]+=simplex[i][j]/n;
+      const worst=simplex[n];
+      const refl=cen.map((c,j)=>c+1.0*(c-worst[j])); const fr=f(refl);
+      if(fr<fvals[0]){
+        const exp=cen.map((c,j)=>c+2.0*(c-worst[j])); const fe=f(exp);
+        simplex[n]=fe<fr?exp:refl; fvals[n]=fe<fr?fe:fr;
+      } else if(fr<fvals[n-1]){ simplex[n]=refl; fvals[n]=fr; }
+      else {
+        const contr=cen.map((c,j)=>c+0.5*(worst[j]-c)); const fc=f(contr);
+        if(fc<fvals[n]){ simplex[n]=contr; fvals[n]=fc; }
+        else { for(let i=1;i<=n;i++){ simplex[i]=simplex[0].map((v,j)=>v+0.5*(simplex[i][j]-v)); fvals[i]=f(simplex[i]); } }
+      }
+    }
+    const idx=fvals.map((v,i)=>i).sort((a,b)=>fvals[a]-fvals[b]);
+    return {x:simplex[idx[0]], f:fvals[idx[0]]};
+  }
+
+  // ---------- Kalman local-trend filter (level + slope, on log price) ----------
+  function kalmanLocalTrend(logPrices){
+    const n=logPrices.length;
+    const rets=[]; for(let i=1;i<n;i++) rets.push(logPrices[i]-logPrices[i-1]);
+    const varR=rets.reduce((a,r)=>a+r*r,0)/Math.max(rets.length,1) || 1e-6;
+    const Q=[[varR*0.6,0],[0,varR*0.01]], R=1e-8, F=[[1,1],[0,1]], FT=mat2T(F);
+    let x=[logPrices[0],0], P=[[1,0],[0,1]];
+    const levels=[x[0]], slopes=[x[1]];
+    for(let t=1;t<n;t++){
+      const xpred=[x[0]+x[1], x[1]];
+      const Ppred=mat2add(mat2mul(mat2mul(F,P),FT),Q);
+      const S=Ppred[0][0]+R, K=[Ppred[0][0]/S, Ppred[1][0]/S];
+      const innov=logPrices[t]-xpred[0];
+      x=[xpred[0]+K[0]*innov, xpred[1]+K[1]*innov];
+      P=[[Ppred[0][0]-K[0]*Ppred[0][0], Ppred[0][1]-K[0]*Ppred[0][1]],
+         [Ppred[1][0]-K[1]*Ppred[0][0], Ppred[1][1]-K[1]*Ppred[0][1]]];
+      levels.push(x[0]); slopes.push(x[1]);
+    }
+    return {levels, slopes, finalLevel:x[0], finalSlope:x[1], varR};
+  }
+
+  // ---------- GARCH(1,1), quasi-MLE via Nelder-Mead ----------
+  function fitGarch(returns){
+    const n=returns.length;
+    const varR=returns.reduce((a,r)=>a+r*r,0)/n || 1e-6;
+    function nll(p){
+      const omega=Math.exp(p[0]);
+      const alpha=1/(1+Math.exp(-p[1]))*0.3;
+      const beta=1/(1+Math.exp(-p[2]))*0.98;
+      if(alpha+beta>=0.999) return 1e10;
+      let h=varR, ll=0;
+      for(let i=1;i<n;i++){
+        h=omega+alpha*returns[i-1]*returns[i-1]+beta*h;
+        if(!(h>0)||!isFinite(h)) return 1e10;
+        ll+=0.5*(Math.log(2*Math.PI)+Math.log(h)+returns[i]*returns[i]/h);
+      }
+      return ll;
+    }
+    const res=nelderMead(nll,[Math.log(varR*0.05),-1,2],{maxIter:600});
+    const omega=Math.exp(res.x[0]), alpha=1/(1+Math.exp(-res.x[1]))*0.3, beta=1/(1+Math.exp(-res.x[2]))*0.98;
+    let h=varR; const hSeries=[varR];
+    for(let i=1;i<n;i++){ h=omega+alpha*returns[i-1]*returns[i-1]+beta*h; hSeries.push(h); }
+    return {omega, alpha, beta, hLast:h, lastReturn:returns[n-1], varLongRun: omega/Math.max(1-alpha-beta,1e-4), hSeries};
+  }
+  function garchForecastCumVar(g,H){
+    let h=g.omega+g.alpha*g.lastReturn*g.lastReturn+g.beta*g.hLast;
+    let cum=0; const arr=[];
+    for(let k=1;k<=H;k++){ cum+=h; arr.push(cum); h=g.omega+(g.alpha+g.beta)*h; }
+    return arr;
+  }
+
+  // ---------- acceleration test (replaces LPPL — see note) ----------
+  // LPPL grid-search was built and tested against synthetic data: it returned "qualifying" fits on pure
+  // noise in 3/3 trials and FAILED to detect a series with genuine embedded log-periodic structure.
+  // That's the textbook multiple-comparisons failure mode of naive LPPL fitting (testing hundreds of
+  // tc/m/omega combinations against noise — something clears almost any single threshold by chance).
+  // Per the framework's own validation gate, that's disqualifying. This replaces it with something
+  // deterministic and honest: is the recent trend unusual relative to the stock's own GARCH-implied
+  // volatility, with no claim about a date or a target.
+  function computeAcceleration(rets, garch){
+    const n=rets.length, W=20, P=60;
+    if(n<W+P) return {available:false};
+    const recentRets=rets.slice(n-W), priorRets=rets.slice(n-W-P,n-W);
+    const recentSlope=recentRets.reduce((a,b)=>a+b,0)/W;
+    const priorSlope=priorRets.reduce((a,b)=>a+b,0)/P;
+    const sumRecent=recentRets.reduce((a,b)=>a+b,0);
+    const hRecent=garch.hSeries.slice(n-W);
+    const varSum=hRecent.reduce((a,b)=>a+b,0);
+    const z = varSum>0 ? sumRecent/Math.sqrt(varSum) : 0;
+    const acceleratingFromBase = recentSlope>0 && (priorSlope<=0 || recentSlope/Math.max(priorSlope,1e-6)>1.5);
+    let label,cls;
+    if(z>2 && acceleratingFromBase){ label="Accelerating — recent run-up is statistically unusual vs. own volatility"; cls="r"; }
+    else if(z>1 && recentSlope>priorSlope){ label="Mildly accelerating — within normal noise, watch"; cls="y"; }
+    else { label="No unusual acceleration"; cls="g"; }
+    return {available:true, z, recentSlope, priorSlope, label, cls};
+  }
+
+  // ---------- orchestration + cache ----------
+  const quantCache={};
+  async function getQuant(sym){
+    const hit=quantCache[sym]; if(hit && Date.now()-hit.t<CANDLE_TTL) return hit.q;
+    const candles=await getCandles(sym);
+    let q;
+    if(!candles || candles.s!=="ok" || !candles.c || candles.c.length<60){ q={unavailable:true, diag:lastCandleDiag||"No diagnostic captured — unexpected empty response."}; }
+    else q=computeQuant(candles);
+    quantCache[sym]={t:Date.now(),q};
+    return q;
+  }
+  function computeQuant(candles){
+    const closes=candles.c, n=closes.length, logP=closes.map(p=>Math.log(p));
+    const kal=kalmanLocalTrend(logP);
+    const rets=[]; for(let i=1;i<n;i++) rets.push(logP[i]-logP[i-1]);
+    const garch=fitGarch(rets);
+    const H=30, cumVar=garchForecastCumVar(garch,H), z=1.645;
+    const forecast=[];
+    for(let h=1;h<=H;h++){
+      const mid=Math.exp(kal.finalLevel+h*kal.finalSlope), sd=Math.sqrt(cumVar[h-1]);
+      forecast.push({h,mid,lo:mid*Math.exp(-z*sd),hi:mid*Math.exp(z*sd)});
+    }
+    const accel=computeAcceleration(rets, garch);
+    const avgGap=(candles.t[n-1]-candles.t[0])/Math.max(n-1,1);
+    return {n, H, candles, closes, logP, kal, garch, forecast, accel, avgGap};
+  }
+
+  // ---------- chart rendering ----------
+  function dateAt(candles,avgGap,n,idx){ return new Date((candles.t[n-1]+(idx-(n-1))*avgGap)*1000); }
+  function shortDate(d){ return d.toLocaleDateString(undefined,{month:"short",day:"numeric"}); }
+  function drawQuantChart(canvas, q){
+    const wrapEl=canvas.parentElement, w=wrapEl.clientWidth||600, h=270;
+    canvas.width=w; canvas.height=h;
+    canvas.style.width=w+"px"; canvas.style.height=h+"px"; // force exact 1:1 display size — the stylesheet's width:100% rule with no explicit height left the browser to auto-scale height to preserve aspect ratio, which could very slightly compress/misplace the bottom-margin date labels depending on the parent's padding math. Inline style wins specificity and removes the ambiguity entirely.
+    const ctx=canvas.getContext("2d");
+    ctx.clearRect(0,0,w,h);
+    const ML=8,MR=8,MT=10,MB=28, pw=w-ML-MR, ph=h-MT-MB; // MB widened to fit date labels
+    const n=q.n, H=q.H, total=n+H;
+    const xAt=i=>ML+(i/(total-1))*pw;
+    const dateForIdx=idx=> idx<=n-1 ? new Date(q.candles.t[idx]*1000) : dateAt(q.candles,q.avgGap,n,idx);
+
+    let yMin=Math.min(...q.logP), yMax=Math.max(...q.logP);
+    q.forecast.forEach(f=>{ yMin=Math.min(yMin,Math.log(f.lo)); yMax=Math.max(yMax,Math.log(f.hi)); });
+    const pad=(yMax-yMin)*0.06||0.05; yMin-=pad; yMax+=pad;
+    const yAt=v=>MT+(yMax-v)/(yMax-yMin)*ph;
+
+    ctx.strokeStyle="#262626"; ctx.fillStyle="#8a9099"; ctx.font="10px Arial"; ctx.lineWidth=1;
+    for(let g=0;g<=3;g++){ const v=yMin+(yMax-yMin)*g/3, y=yAt(v);
+      ctx.beginPath(); ctx.moveTo(ML,y); ctx.lineTo(w-MR,y); ctx.stroke();
+      ctx.fillText("$"+Math.exp(v).toFixed(2), ML+2, y-3); }
+
+    // forecast cone
+    ctx.beginPath();
+    ctx.moveTo(xAt(n-1), yAt(q.logP[n-1]));
+    q.forecast.forEach(f=>ctx.lineTo(xAt(n-1+f.h), yAt(Math.log(f.hi))));
+    for(let i=q.forecast.length-1;i>=0;i--) ctx.lineTo(xAt(n-1+q.forecast[i].h), yAt(Math.log(q.forecast[i].lo)));
+    ctx.closePath(); ctx.fillStyle="rgba(59,130,246,0.15)"; ctx.fill();
+
+    // historical price
+    ctx.beginPath(); ctx.strokeStyle="#e8e8e8"; ctx.lineWidth=1.5;
+    q.logP.forEach((v,i)=>{ const x=xAt(i),y=yAt(v); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); }); ctx.stroke();
+
+    // Kalman smoothed trend (history)
+    ctx.beginPath(); ctx.strokeStyle="#3b82f6"; ctx.lineWidth=1.3; ctx.setLineDash([]);
+    q.kal.levels.forEach((v,i)=>{ const x=xAt(i),y=yAt(v); i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); }); ctx.stroke();
+
+    // forecast midline (dashed)
+    ctx.beginPath(); ctx.strokeStyle="#3b82f6"; ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
+    ctx.moveTo(xAt(n-1), yAt(q.logP[n-1]));
+    q.forecast.forEach(f=>ctx.lineTo(xAt(n-1+f.h), yAt(Math.log(f.mid)))); ctx.stroke(); ctx.setLineDash([]);
+
+    // x-axis date ticks — collision-aware: "Today" always wins placement (it's the key anchor),
+    // start/end next, interior ticks only drawn if they don't overlap something already placed.
+    // (Fixed-position ticks previously crammed today/forecast-mid/forecast-end into the rightmost
+    // ~10% of the chart and their labels overlapped — this replaces that with real measured spacing.)
+    const GAP=8; // min px between adjacent labels
+    const placed=[]; // [left,right] pixel bounds already drawn
+    function boundsFor(x,width,align){
+      if(align==="left") return [x,x+width];
+      if(align==="right") return [x-width,x];
+      return [x-width/2,x+width/2];
+    }
+    function overlapsAny(b){ return placed.some(p=> b[0]<p[1]+GAP && p[0]<b[1]+GAP); }
+    function tryPlaceLabel(idx,opts){
+      idx=Math.max(0,Math.min(total-1,idx));
+      const x=xAt(idx);
+      const align = opts&&opts.align ? opts.align : (idx===0?"left": idx===total-1?"right":"center");
+      const label = (opts&&opts.text) || (shortDate(dateForIdx(idx))+(idx>n-1?" (est)":""));
+      ctx.font = opts&&opts.bold ? "bold 11px Arial" : "10px Arial";
+      const width=ctx.measureText(label).width;
+      const b=boundsFor(x,width,align);
+      if(!(opts&&opts.force) && overlapsAny(b)) return false;
+      placed.push(b);
+      ctx.fillStyle = opts&&opts.bold ? "#cfd3d8" : "#8a9099";
+      ctx.strokeStyle = opts&&opts.bold ? "#3b82f6" : "#1c1c1c";
+      ctx.beginPath(); ctx.moveTo(x,h-MB); ctx.lineTo(x,h-MB+4); ctx.stroke();
+      ctx.textAlign=align; ctx.fillText(label,x,h-6);
+      return true;
+    }
+
+    // "today" marker line
+    const tx=xAt(n-1);
+    ctx.beginPath(); ctx.strokeStyle="#555"; ctx.setLineDash([2,2]); ctx.moveTo(tx,MT); ctx.lineTo(tx,h-MB); ctx.stroke(); ctx.setLineDash([]);
+
+    // priority order: Today (forced, never skipped) > chart start/end > interior fill-ins
+    tryPlaceLabel(n-1, {text:"Today · "+shortDate(dateForIdx(n-1)), align:"center", bold:true, force:true});
+    tryPlaceLabel(0);
+    tryPlaceLabel(total-1);
+    tryPlaceLabel(n-1+H);          // forecast end (skipped automatically if it'd collide with Today/end)
+    tryPlaceLabel(Math.round((n-1)*0.5));
+    tryPlaceLabel(n-1+Math.round(H/2));
+    tryPlaceLabel(Math.round((n-1)*0.25));
+    tryPlaceLabel(Math.round((n-1)*0.75));
+    ctx.textAlign="left";
+  }
+
+  // ---------- quant section HTML ----------
+  function renderQuantSection(sym, q){
+    const wrap=`<div class="card" id="quantCard"><div class="qhead"><h2 style="margin:0">Kalman Trend · GARCH(1,1) Volatility · Acceleration Test</h2></div>`;
+    if(!q || q.unavailable){
+      return wrap+`<div class="muted" style="font-size:13px"><b class="txt-y">No historical data for ${sym}.</b><br>${esc(q&&q.diag?q.diag:"Unknown reason.")}</div></div>`;
+    }
+    const kal=q.kal, garch=q.garch;
+    const dailySlopePct=kal.finalSlope*100, annSlopePct=kal.finalSlope*252*100;
+    const last=q.forecast[q.forecast.length-1];
+    const bandWidthPct=((last.hi/last.mid)-1)*100;
+    const dailySigma=Math.sqrt(garch.hLast)*100, annSigma=dailySigma*Math.sqrt(252);
+    const lrSigma=Math.sqrt(garch.varLongRun)*100*Math.sqrt(252);
+    const persistence=garch.alpha+garch.beta;
+
+    let accelBlock;
+    if(!q.accel.available){
+      accelBlock=`<div class="qbox"><div class="t">Acceleration Test</div><div class="d muted">Insufficient history (need ~80+ sessions).</div></div>`;
+    } else {
+      const a=q.accel;
+      accelBlock=`<div class="qbox"><div class="t">Acceleration Test</div>
+        <div class="d txt-${a.cls}">${a.label}</div>
+        <div class="d muted" style="font-size:11px">z=${a.z.toFixed(2)} (last 20-session return vs. own GARCH-implied vol) · recent slope ${(a.recentSlope*100).toFixed(3)}%/session vs prior ${(a.priorSlope*100).toFixed(3)}%/session</div>
+      </div>`;
+    }
+
+    return wrap+
+      `<div class="qcanvas-wrap"><canvas id="quantCanvas"></canvas></div>
+      <div class="qlegend">
+        <span><i class="qsw" style="background:#e8e8e8"></i>Price</span>
+        <span><i class="qsw" style="background:#3b82f6"></i>Kalman Trend</span>
+        <span><i class="qsw" style="background:rgba(59,130,246,0.4)"></i>GARCH 90% Cone</span>
+      </div>
+      <div class="qrow">
+        <div class="qbox"><div class="t">Kalman Local Trend</div>
+          <div class="d">${dailySlopePct>=0?'+':''}${dailySlopePct.toFixed(3)}%/session (≈${annSlopePct>=0?'+':''}${annSlopePct.toFixed(0)}% annualized)</div>
+          <div class="d muted" style="font-size:11px">30-session projection: ${fmt$(last.mid)} · band ${fmt$(last.lo)}–${fmt$(last.hi)} (±${bandWidthPct.toFixed(1)}%)</div>
+        </div>
+        <div class="qbox"><div class="t">GARCH(1,1) Volatility</div>
+          <div class="d">σ daily ≈ ${dailySigma.toFixed(2)}% (annualized ≈ ${annSigma.toFixed(0)}%)</div>
+          <div class="d muted" style="font-size:11px">long-run σ ≈ ${lrSigma.toFixed(0)}% · persistence α+β=${persistence.toFixed(2)} ${persistence>0.95?'(slow-decaying vol clusters)':''}</div>
+        </div>
+      </div>
+      ${accelBlock}
+      <div class="qnote">Kalman trend + GARCH cone are statistically-grounded forecasts with honest, widening uncertainty. The acceleration test flags recent run-ups that are unusual relative to the stock's own volatility — it is a deterministic z-score, not a curve fit, and makes no claim about timing or magnitude.</div>
+    </div>`;
+  }
+
+  // ---------- analysis panel ----------
+  let currentSymbol=null;
+  async function analyze(sym){
+    currentSymbol=sym;
+    const wrap=el("analysis");
+    if(!workerConfigured()){ wrap.innerHTML='<div class="card"><b>'+sym+'</b><div class="muted" style="margin-top:8px">Set WORKER_BASE at the top of the script to your deployed Worker URL — see worker.js for deploy steps.</div></div>'; el("setupNotice").classList.remove("hidden"); return; }
+    wrap.innerHTML='<div class="card muted">Loading '+sym+'…</div>';
+    const [q,m,prof,quant,ext]=await Promise.all([ fj(`quote?symbol=${sym}`), getMetric(sym), fj(`stock/profile2?symbol=${sym}`), getQuant(sym), getExt(sym) ]);
+    const name=(prof&&prof.name)||TICKER_DB[sym]||"";
+    const c=(q&&q.c>0)?q.c:null, dp=(q&&typeof q.dp==="number")?q.dp:null;
+    const M=m||{};
+    const hi=M["52WeekHigh"], lo=M["52WeekLow"];
+    const off=(c&&hi)?((c-hi)/hi*100):null;
+    const pos=(c&&hi&&lo&&hi>lo)?((c-lo)/(hi-lo)*100):null;
+    const pe=num(M.peTTM)||num(M.peBasicExclExtraTTM)||num(M.peNormalizedAnnual);
+    const beta=num(M.beta);
+    const mcap=(prof&&prof.marketCapitalization)||null;
+    const rs13=num(M["priceRelativeToS&P50013Week"]);
+    const ret13=num(M["13WeekPriceReturnDaily"]), ret26=num(M["26WeekPriceReturnDaily"]), retYTD=num(M["yearToDatePriceReturnDaily"]);
+    const onWL=watchlist.includes(sym);
+    const directive = (quant && !quant.unavailable) ? buildDirective(sym, quant.candles) : {html:'<div class="muted" style="font-size:13px">Self-relative read needs price history — see the historical-data note below.</div>', available:false};
+
+    // pre/post-market line — only render when there's something real to show
+    let extLine="";
+    if(ext && ext.s==="ok"){
+      const parts=[];
+      if(ext.preMarketPrice!=null) parts.push(`Pre-market ${fmt$(ext.preMarketPrice)} <span class="${(ext.preMarketChangePercent||0)>=0?'txt-g':'txt-r'}">${fmtPct(ext.preMarketChangePercent)}</span>`);
+      if(ext.postMarketPrice!=null) parts.push(`After-hours ${fmt$(ext.postMarketPrice)} <span class="${(ext.postMarketChangePercent||0)>=0?'txt-g':'txt-r'}">${fmtPct(ext.postMarketChangePercent)}</span>`);
+      if(parts.length) extLine=`<div class="sub muted" style="margin-top:3px">${parts.join(' &nbsp;·&nbsp; ')}</div>`;
+    }
+
+    const cell=(l,val,cls="",style="")=>`<div class="metric"><div class="l">${l}</div><div class="v ${cls}" style="${style}">${val}</div></div>`;
+    const discPct = directive.discountPercentile!=null?directive.discountPercentile:null;
+    const momPct = directive.momentumPercentile!=null?directive.momentumPercentile:null;
+
+    wrap.innerHTML=`<div class="card">
+      <div class="head">
+        <div>
+          <div style="font-size:13px;color:var(--muted)">${sym}${prof&&prof.finnhubIndustry?' · '+esc(prof.finnhubIndustry):''}</div>
+          <div style="font-size:17px;font-weight:700">${esc(name)}
+            <span class="badge ${onWL?'txt-a':'muted'}" id="wlBadge">${onWL?'★ On Watchlist':'☆ Add'}</span>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="price-big">${c!=null?fmt$(c):'—'}</div>
+          <div class="sub ${dp!=null?(dp>=0?'txt-g':'txt-r'):''}">${dp!=null?fmtPct(dp)+' today':''}</div>
+          ${extLine}
+        </div>
+      </div>
+
+      <div class="metrics">
+        ${cell("Off 52w High", off!=null?fmtPct(off):"—")}
+        ${cell("Discount %ile", discPct!=null?discPct.toFixed(0)+"%":"—", "", discPct!=null?`color:${pctColorNeutral(discPct)}`:"")}
+        ${cell("52w High", hi?fmt$(hi):"—")}
+        ${cell("52w Low", lo?fmt$(lo):"—")}
+        ${cell("13w Return", ret13!=null?fmtPct(ret13):"—", ret13!=null?(ret13>=0?'txt-g':'txt-r'):"")}
+        ${cell("26w Return", ret26!=null?fmtPct(ret26):"—", ret26!=null?(ret26>=0?'txt-g':'txt-r'):"")}
+        ${cell("Momentum %ile", momPct!=null?momPct.toFixed(0)+"%":"—", "", momPct!=null?`color:${pctColorNeutral(momPct)}`:"")}
+        ${cell("YTD", retYTD!=null?fmtPct(retYTD):"—", retYTD!=null?(retYTD>=0?'txt-g':'txt-r'):"")}
+        ${cell("RS vs S&P 13w", rs13!=null?fmtPct(rs13):"—", rs13!=null?(rs13>=0?'txt-g':'txt-r'):"")}
+        ${cell("P/E", pe?pe.toFixed(1):"—")}
+        ${cell("Beta", beta?beta.toFixed(2):"—")}
+        ${cell("Mkt Cap", fmtCap(mcap))}
+      </div>
+
+      ${pos!=null?`<div class="band">
+        <div class="muted" style="font-size:11px">Position in 52-week range</div>
+        <div class="band-track"><div class="band-mark" style="left:${Math.max(0,Math.min(100,pos))}%"></div></div>
+        <div class="band-lab"><span>${fmt$(lo)}</span><span>${pos.toFixed(0)}% of range</span><span>${fmt$(hi)}</span></div>
+      </div>`:""}
+
+      <div class="card" style="margin:14px 0 0;background:var(--card2)">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px">Historical Context</div>
+        ${directive.html}
+      </div>
+    </div>` + renderQuantSection(sym, quant);
+
+    const wb=el("wlBadge"); if(wb) wb.addEventListener("click",()=>{
+      const i=watchlist.indexOf(sym); if(i<0) watchlist.push(sym); else watchlist.splice(i,1);
+      saveWL(); analyze(sym); renderWatchlist();
+    });
+    const canvas=el("quantCanvas");
+    if(canvas && quant && !quant.unavailable) drawQuantChart(canvas, quant);
+  }
+
+  // ---------- watchlist auto-screen ----------
+  async function renderWatchlist(){
+    const wrap=el("watchlist");
+    if(!watchlist.length){ wrap.innerHTML='<div class="empty">Empty. Search a name and tap ★ to add.</div>'; return; }
+    wrap.innerHTML=watchlist.map(s=>`<div class="wl-row" data-sym="${s}">
+      <div class="wl-left"><span class="dot" id="d_${s}" style="background:#444"></span><span class="wl-sym">${s}</span><span class="muted" id="p_${s}">…</span></div>
+      <div style="display:flex;align-items:center;gap:10px"><span id="o_${s}" class="muted" style="font-size:12px"></span><span id="v_${s}" style="font-size:12px"></span><button class="ghost sm" data-rm="${s}">✕</button></div>
+    </div>`).join("");
+    wrap.querySelectorAll(".wl-row").forEach(r=>r.addEventListener("click",e=>{ if(e.target.dataset.rm)return; select(r.dataset.sym); window.scrollTo({top:0,behavior:"smooth"}); }));
+    wrap.querySelectorAll("[data-rm]").forEach(b=>b.addEventListener("click",e=>{ e.stopPropagation();
+      const i=watchlist.indexOf(b.dataset.rm); if(i>=0){ watchlist.splice(i,1); saveWL(); renderWatchlist(); } }));
+    if(!workerConfigured()) return;
+    for(const s of watchlist){ screenRow(s); }   // staggered by await inside
+  }
+  async function screenRow(s){
+    const [q,d]=await Promise.all([ fj(`quote?symbol=${s}`), getCandles(s) ]);
+    const c=(q&&q.c>0)?q.c:null; const dp=(q&&typeof q.dp==="number")?q.dp:null;
+    let discPct=null, momPct=null;
+    if(d && d.s==="ok" && d.c && d.c.length>=160){
+      const {discount,momentum}=buildSelfRelSeries(d.c);
+      discPct=pctRankGreater(discount.slice(0,-1), discount[discount.length-1]);
+      momPct=pctRankLess(momentum.slice(0,-1), momentum[momentum.length-1]);
+    }
+    // 50/50 blend is a disclosed, arbitrary visual-aid only (for the single scan-dot color) — not a decision rule.
+    const combined=(discPct!=null&&momPct!=null)?(discPct*0.5+momPct*0.5):null;
+    const pe=el("p_"+s); if(pe) pe.innerHTML=(c!=null?fmt$(c):"—")+(dp!=null?` <span class="${dp>=0?'txt-g':'txt-r'}">${fmtPct(dp)}</span>`:"");
+    const oo=el("o_"+s); if(oo) oo.innerHTML = discPct!=null?`<span style="color:${pctColorNeutral(discPct)}">Discount ${discPct.toFixed(0)}%ile</span>`:"";
+    const vv=el("v_"+s); if(vv){ vv.style.color=momPct!=null?pctColorNeutral(momPct):""; vv.textContent=momPct!=null?`Momentum ${momPct.toFixed(0)}%ile`:""; }
+    const dd=el("d_"+s); if(dd) dd.style.background=combined!=null?pctColorNeutral(combined):"#444"; // blended with momentum, which isn't good/bad-coded, so neither is this
+  }
+
+  // ---------- connection check (replaces key management — nothing to enter anymore) ----------
+  function checkConnection(){
+    const btn=el("connBtn");
+    if(!workerConfigured()){ btn.textContent="Set WORKER_BASE First"; el("setupNotice").classList.remove("hidden"); setTimeout(()=>btn.textContent="Check Connection",2500); return; }
+    btn.textContent="Checking…";
+    fetch(`${WORKER_BASE}/`).then(r=>r.json()).then(d=>{
+      btn.textContent = (d&&d.status==="ok") ? "✓ Connected" : "✕ Unexpected Response";
+    }).catch(()=>{ btn.textContent="✕ Unreachable"; })
+    .finally(()=>setTimeout(()=>{ btn.textContent="Check Connection"; },3000));
+  }
+
+  // ---------- wiring ----------
+  el("lookup").addEventListener("input",onInput);
+  el("lookup").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); select(lastResults[0]?lastResults[0].symbol:el("lookup").value); }});
+  document.addEventListener("click",e=>{ if(!e.target.closest("#lookupResults")&&e.target.id!=="lookup") el("lookupResults").className="lookup-results"; });
+  el("connBtn").addEventListener("click",checkConnection);
+
+  // ---------- boot ----------
+  function boot(){
+    if(!workerConfigured()) el("setupNotice").classList.remove("hidden"); else el("setupNotice").classList.add("hidden");
+    loadRegime();
+    renderWatchlist();
+    if(currentSymbol) analyze(currentSymbol);
+    if(workerConfigured()) setInterval(()=>{ loadRegime(); renderWatchlist(); if(currentSymbol) analyze(currentSymbol); }, 60000); // auto-refresh
+  }
+  window.addEventListener("resize",()=>{
+    const canvas=el("quantCanvas");
+    if(canvas && currentSymbol){ const q=quantCache[currentSymbol]; if(q&&q.q&&!q.q.unavailable) drawQuantChart(canvas,q.q); }
+  });
+  boot();
+})();
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>
